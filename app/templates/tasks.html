@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Your Tasks</h1>
+    <a href="{{ url_for('main.new_task') }}" class="btn btn-primary">New Task</a>
+    {% for task in tasks %}
+        <div>
+            <h2><a href="{{ url_for('main.task', task_id=task.id) }}">{{ task.title }}</a></h2>
+            <p>{{ task.description }}</p>
+            <small>Created: {{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+        </div>
+    {% endfor %}
+{% endblock %}
