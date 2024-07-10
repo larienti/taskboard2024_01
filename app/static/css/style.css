@@ -1,0 +1,36 @@
+.kanban-board {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.column {
+    background-color: #f4f4f4;
+    border-radius: 5px;
+    padding: 10px;
+    width: 30%;
+    min-height: 300px;
+}
+
+.column-title {
+    margin-bottom: 10px;
+}
+
+.task-list {
+    min-height: 50px; /* Ensures empty lists have some height for dropping */
+}
+
+.task {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: move;
+}
+
+.empty-list {
+    color: #999;
+    text-align: center;
+    padding: 10px;
+}

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, request, abort
+from flask import Blueprint, render_template, flash, redirect, url_for, request, abort, jsonify
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.urls import url_parse
 from . import db
@@ -62,7 +62,7 @@ def tasks():
 def new_task():
     form = TaskForm()
     if form.validate_on_submit():
-        task = Task(title=form.title.data, description=form.description.data, author=current_user)
+        task = Task(title=form.title.data, description=form.description.data, author=current_user, status='New tasks')
         db.session.add(task)
         db.session.commit()
         flash('Your task has been created!', 'success')
@@ -85,8 +85,9 @@ def update_task(task_id):
     if form.validate_on_submit():
         task.title = form.title.data
         task.description = form.description.data
+        task.status='New tasks'
         db.session.commit()
-        flash('Your task has been updated!', 'success')
+        flash('Your task has been updated! Please modify the task status in Kanban', 'success')
         return redirect(url_for('main.task', task_id=task.id))
     elif request.method == 'GET':
         form.title.data = task.title
@@ -103,3 +104,28 @@ def delete_task(task_id):
     db.session.commit()
     flash('Your task has been deleted!', 'success')
     return redirect(url_for('main.tasks'))
+
+@main.route('/kanban')
+@login_required
+def kanban():
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    return render_template('kanban.html', tasks=tasks)
+
+@main.route('/update_task_status', methods=['POST'])
+@login_required
+def update_task_status():
+    task_id = request.json.get('taskId')
+    new_status = request.json.get('newStatus')
+    task = Task.query.get(task_id)
+    if task and task.user_id == current_user.id:
+        valid_statuses = ['New tasks', 'Backlog', 'Todo', 'In Progress', 'Done']
+        new_status = new_status.replace('-', ' ').title()
+        if new_status == 'New Tasks':
+            new_status = 'New tasks'
+        if new_status in valid_statuses:
+            task.status = new_status
+        else:
+            task.status = 'New tasks'  # Default to 'New tasks' if status is not recognized
+        db.session.commit()
+        return jsonify({'success': True, 'newStatus': task.status})
+    return jsonify({'success': False, 'message': 'Task not found or unauthorized'}), 400

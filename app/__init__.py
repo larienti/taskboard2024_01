@@ -9,7 +9,7 @@ login_manager.login_view = 'main.login'
 migrate = Migrate()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/static')
     app.config['SECRET_KEY'] = 'your-secret-key'  # Change this!
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@db/taskboard'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

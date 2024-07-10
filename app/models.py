@@ -10,7 +10,6 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     tasks = db.relationship('Task', backref='author', lazy='dynamic')
 
-
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -23,6 +22,7 @@ class Task(db.Model):
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
+    status = db.Column(db.String(20), default='New tasks')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):

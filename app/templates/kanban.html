@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="kanban-board">
+    <div class="column" id="new-tasks">
+        <h2 class="column-title">New Tasks</h2>
+        <div class="task-list">
+            {% for task in tasks if task.status == 'New tasks' %}
+                <div class="task" draggable="true" data-task-id="{{ task.id }}">
+                    {{ task.title }}
+                </div>
+            {% else %}
+                <div class="empty-list">No new tasks</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="column" id="backlog">
+        <h2 class="column-title">Backlog</h2>
+        <div class="task-list">
+            {% for task in tasks if task.status == 'Backlog' %}
+                <div class="task" draggable="true" data-task-id="{{ task.id }}">
+                    {{ task.title }}
+                </div>
+            {% else %}
+                <div class="empty-list">No tasks in backlog</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="column" id="todo">
+        <h2 class="column-title">To Do</h2>
+        <div class="task-list">
+            {% for task in tasks if task.status == 'Todo' %}
+                <div class="task" draggable="true" data-task-id="{{ task.id }}">
+                    {{ task.title }}
+                </div>
+            {% else %}
+                <div class="empty-list">No tasks to do</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="column" id="in-progress">
+        <h2 class="column-title">In Progress</h2>
+        <div class="task-list">
+            {% for task in tasks if task.status == 'In Progress' %}
+                <div class="task" draggable="true" data-task-id="{{ task.id }}">
+                    {{ task.title }}
+                </div>
+            {% else %}
+                <div class="empty-list">No tasks in progress</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="column" id="done">
+        <h2 class="column-title">Done</h2>
+        <div class="task-list">
+            {% for task in tasks if task.status == 'Done' %}
+                <div class="task" draggable="true" data-task-id="{{ task.id }}">
+                    {{ task.title }}
+                </div>
+            {% else %}
+                <div class="empty-list">No tasks done</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    var taskLists = document.querySelectorAll('.task-list');
+    taskLists.forEach(taskList => {
+        new Sortable(taskList, {
+            group: 'shared',
+            animation: 150,
+            draggable: ".task",  // Only elements with class 'task' are draggable
+            onEnd: function (evt) {
+                var taskId = evt.item.getAttribute('data-task-id');
+                var newStatus = evt.to.closest('.column').id;
+                fetch('/update_task_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({taskId: taskId, newStatus: newStatus}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        console.error('Failed to update task status:', data.message);
+                    } else {
+                        // Optionally, update the UI to reflect the new status
+                        console.log('Task updated successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
