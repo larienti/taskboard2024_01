@@ -8,6 +8,10 @@
             <h2><a href="{{ url_for('main.task', task_id=task.id) }}">{{ task.title }}</a></h2>
             <p>{{ task.description }}</p>
             <small>Created: {{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+            ({{ task.status }})
+            {% if task.is_claimed_by(current_user) %}
+                [Claimed]
+            {% endif %}
         </div>
     {% endfor %}
 {% endblock %}

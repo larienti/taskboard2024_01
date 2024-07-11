@@ -13,7 +13,8 @@
         <a class="navbar-brand" href="{{ url_for('main.index') }}">Taskboard</a>
         <div class="navbar-nav">
             {% if current_user.is_authenticated %}
-            <a class="nav-item nav-link" href="{{ url_for('main.tasks') }}">Tasks</a>
+            <a class="nav-item nav-link" href="{{ url_for('main.tasks') }}">All Tasks</a>
+            <a class="nav-item nav-link" href="{{ url_for('main.claimed_tasks') }}">Claimed Tasks</a>
             <a class="nav-item nav-link" href="{{ url_for('main.kanban') }}">Kanban Board</a>
             <a class="nav-item nav-link" href="{{ url_for('main.logout') }}">Logout</a>
             {% else %}

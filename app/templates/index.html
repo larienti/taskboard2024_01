@@ -1,12 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taskboard</title>
-</head>
-<body>
-    <h1>Welcome to Taskboard</h1>
-    <p>Your tasks will appear here soon!</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome-container">
+    <pre class="ascii-art">
+   __                
+  / /  __ _ _ __ ___ 
+ / /  / _` | '__/ __|
+/ /__| (_| | |  \__ \
+\____/\__,_|_|  |___/  
+    </pre>
+    <h1 class="welcome-title">Welcome to my Multifunctional Personal Website</h1>
+    <p class="welcome-text">
+        This space serves as a hub for my various projects, interests, and professional endeavors. 
+        Feel free to explore and discover more about my work and passions.
+    </p>
+    <p class="contact-info">
+        For professional opportunities or collaborations, please contact me at:
+        <a href="mailto:lars.arienti@gmail.com" class="email-link">lars.arienti@gmail.com</a>
+    </p>
+</div>
+{% endblock %}

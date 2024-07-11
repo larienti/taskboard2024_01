@@ -15,7 +15,7 @@ rm -rf migrations
 flask db init
 
 # Create a new migration
-flask db migrate -m "Create user and task tables"
+flask db migrate -m "Create tables"
 
 # Apply the migration
 flask db upgrade

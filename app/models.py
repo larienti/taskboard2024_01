@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
     tasks = db.relationship('Task', backref='author', lazy='dynamic')
+    claims = db.relationship('Tag', back_populates='user')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -16,14 +17,60 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    def claim_task(self, task):
+        claim_tag = Tag(name=f'Claimed by {self.username}', type='claim', user=self)
+        task.add_tag(claim_tag)
+        db.session.add(claim_tag)
+        db.session.commit()
+
+    def unclaim_task(self, task):
+        claim_tags = [tag for tag in task.tags if tag.type == 'claim' and tag.user == self]
+        for tag in claim_tags:
+            task.remove_tag(tag)
+            db.session.delete(tag)
+        db.session.commit()
+    
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='New tasks')
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
-    status = db.Column(db.String(20), default='New tasks')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    tags = db.relationship('Tag', secondary='task_tags', back_populates='tasks')
 
     def __repr__(self):
         return f'<Task {self.title}>'
+    
+    def add_tag(self, tag):
+        if tag not in self.tags:
+            self.tags.append(tag)
+
+    def remove_tag(self, tag):
+        if tag in self.tags:
+            self.tags.remove(tag)
+
+    def is_claimed_by(self, user):
+        return any(tag.type == 'claim' and tag.user == user for tag in self.tags)
+    
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(20), nullable=False)  # e.g., 'claim', 'category', 'priority', etc.
+
+    # For 'claim' type tags, we'll associate a user
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user = db.relationship('User', back_populates='claims')
+
+    # Many-to-many relationship with Task
+    tasks = db.relationship('Task', secondary='task_tags', back_populates='tags')
+
+    def __repr__(self):
+        return f'<Tag {self.name} ({self.type})>'
+
+# Association table for the many-to-many relationship between Task and Tag
+task_tags = db.Table('task_tags',
+    db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)

@@ -12,6 +12,15 @@
             {{ form.description.label }}
             {{ form.description }}
         </div>
+        <div>
+            {{ form.status.label }}
+            {{ form.status }}
+        </div>
+        <div>
+            {{ form.tags.label }}
+            {{ form.tags }}
+            <small>(Apply multiple category tags by separating them with a comma. Ex: "Hard, HTML")</small>
+        </div>
         {{ form.submit }}
     </form>
 {% endblock %}

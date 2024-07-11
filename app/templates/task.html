@@ -3,11 +3,29 @@
 {% block content %}
     <h1>{{ task.title }}</h1>
     <p>{{ task.description }}</p>
-    <small>Created: {{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+    <p>Status: {{ task.status }}</p>
+    <p>Created by: {{ task.author.username }}</p>
     <div>
         <a href="{{ url_for('main.update_task', task_id=task.id) }}" class="btn btn-secondary">Update</a>
         <form action="{{ url_for('main.delete_task', task_id=task.id) }}" method="POST" style="display: inline;">
             <input type="submit" value="Delete" class="btn btn-danger" onclick="return confirm('Are you sure?');">
         </form>
     </div>
+
+    <h2>Tags:</h2>
+    <ul>
+    {% for tag in task.tags %}
+        <li>{{ tag.name }} ({{ tag.type }})</li>
+    {% endfor %}
+    </ul>
+    
+    {% if task.is_claimed_by(current_user) %}
+        <form action="{{ url_for('main.unclaim_task', task_id=task.id) }}" method="POST">
+            <input type="submit" value="Unclaim Task">
+        </form>
+    {% else %}
+        <form action="{{ url_for('main.claim_task', task_id=task.id) }}" method="POST">
+            <input type="submit" value="Claim Task">
+        </form>
+    {% endif %}
 {% endblock %}

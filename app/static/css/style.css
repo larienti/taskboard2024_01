@@ -34,3 +34,67 @@
     text-align: center;
     padding: 10px;
 }
+
+{% block styles %}
+<style>
+    .welcome-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .ascii-art {
+        font-family: monospace;
+        white-space: pre;
+        font-size: 0.7rem;
+        line-height: 1;
+        margin-bottom: 2rem;
+        color: #343a40;
+    }
+
+    .welcome-title {
+        color: #343a40;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .welcome-text {
+        color: #495057;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .contact-info {
+        font-size: 1.1rem;
+        color: #495057;
+        margin-top: 2rem;
+    }
+
+    .email-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s ease;
+    }
+
+    .email-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .ascii-art {
+            font-size: 0.5rem;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}

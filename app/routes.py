@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request,
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.urls import url_parse
 from . import db
-from .models import User, Task
-from .forms import RegistrationForm, LoginForm, TaskForm
+from .models import User, Task, Tag
+from .forms import RegistrationForm, LoginForm, TaskForm, ClaimTaskForm, UnclaimTaskForm
 
 main = Blueprint('main', __name__)
 
@@ -54,22 +54,32 @@ def logout():
 @main.route('/tasks')
 @login_required
 def tasks():
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    tasks = Task.query.all()  # This will show all tasks
     return render_template('tasks.html', tasks=tasks)
+
+@main.route('/claimed_tasks')
+@login_required
+def claimed_tasks():
+    claimed_tasks = Task.query.join(Task.tags).filter(Tag.type == 'claim', Tag.user == current_user).all()
+    return render_template('claimed_tasks.html', tasks=claimed_tasks)
 
 @main.route('/task/new', methods=['GET', 'POST'])
 @login_required
 def new_task():
     form = TaskForm()
     if form.validate_on_submit():
-        task = Task(title=form.title.data, description=form.description.data, author=current_user, status='New tasks')
+        task = Task(title=form.title.data, description=form.description.data, status='New tasks', author=current_user)
         db.session.add(task)
+        if form.category.data:
+            category_tag = Tag(name=form.category.data, type='category')
+            db.session.add(category_tag)
+            task.add_tag(category_tag)
         db.session.commit()
         flash('Your task has been created!', 'success')
-        return redirect(url_for('main.tasks'))
+        return redirect(url_for('main.task', task_id=task.id))
     return render_template('create_task.html', title='New Task', form=form)
 
-@main.route('/task/<int:task_id>')
+@main.route('/task/<int:task_id>', methods=['GET'])
 @login_required
 def task(task_id):
     task = Task.query.get_or_404(task_id)
@@ -85,13 +95,28 @@ def update_task(task_id):
     if form.validate_on_submit():
         task.title = form.title.data
         task.description = form.description.data
-        task.status='New tasks'
+        task.status = form.status.data
+
+        # Handle tags
+        new_tag_names = [name.strip() for name in form.tags.data.split(',') if name.strip()]
+        # Remove existing tags
+        task.tags = []
+        # Add new tags
+        for tag_name in new_tag_names:
+            tag = Tag.query.filter_by(name=tag_name, type='category').first()
+            if not tag:
+                tag = Tag(name=tag_name, type='category')
+                db.session.add(tag)
+            task.tags.append(tag)
+
         db.session.commit()
-        flash('Your task has been updated! Please modify the task status in Kanban', 'success')
+        flash('Your task has been updated! (you will need to re-claim the task after updating)', 'success')
         return redirect(url_for('main.task', task_id=task.id))
     elif request.method == 'GET':
         form.title.data = task.title
         form.description.data = task.description
+        form.status.data = task.status
+        form.tags.data = ', '.join([tag.name for tag in task.tags if tag.type == 'category'])
     return render_template('create_task.html', title='Update Task', form=form)
 
 @main.route('/task/<int:task_id>/delete', methods=['POST'])
@@ -129,3 +154,27 @@ def update_task_status():
         db.session.commit()
         return jsonify({'success': True, 'newStatus': task.status})
     return jsonify({'success': False, 'message': 'Task not found or unauthorized'}), 400
+
+@main.route('/claim_task/<int:task_id>', methods=['POST'])
+@login_required
+def claim_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    if task.is_claimed_by(current_user):
+        flash('You have already claimed this task.', 'info')
+    else:
+        current_user.claim_task(task)
+        db.session.commit()
+        flash('Task claimed successfully!', 'success')
+    return redirect(url_for('main.task', task_id=task.id))
+
+@main.route('/unclaim_task/<int:task_id>', methods=['POST'])
+@login_required
+def unclaim_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    if task.is_claimed_by(current_user):
+        current_user.unclaim_task(task)
+        db.session.commit()
+        flash('Task unclaimed successfully!', 'success')
+    else: 
+        flash('You have not claimed this task.', 'info')
+    return redirect(url_for('main.task', task_id=task.id))
