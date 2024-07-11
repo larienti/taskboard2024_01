@@ -19,7 +19,7 @@ def create_app():
     migrate.init_app(app, db)
 
     from .routes import main
-    from .models import User, Task, Tag
+    from .models import User, Task, Tag, AccessLevel
     app.register_blueprint(main)
 
     @login_manager.user_loader

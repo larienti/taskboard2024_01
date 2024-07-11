@@ -2,6 +2,12 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from datetime import datetime
+from enum import Enum
+
+class AccessLevel(Enum):
+    NOOB = 1
+    ANON = 2
+    MOOT = 3
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -10,10 +16,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     tasks = db.relationship('Task', backref='author', lazy='dynamic')
     claims = db.relationship('Tag', back_populates='user')
+    access_level = db.Column(db.Enum(AccessLevel), default=AccessLevel.MOOT)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
@@ -22,13 +28,24 @@ class User(UserMixin, db.Model):
         task.add_tag(claim_tag)
         db.session.add(claim_tag)
         db.session.commit()
-
     def unclaim_task(self, task):
         claim_tags = [tag for tag in task.tags if tag.type == 'claim' and tag.user == self]
         for tag in claim_tags:
             task.remove_tag(tag)
             db.session.delete(tag)
         db.session.commit()
+
+    def set_access_level(self, level):
+        if isinstance(level, AccessLevel):
+            self.access_level = level
+        elif isinstance(level, str):
+            self.access_level = AccessLevel[level.upper()]
+        else:
+            raise ValueError("Invalid access level")
+    def has_access_level(self, level):
+        if isinstance(level, str):
+            level = AccessLevel[level.upper()]
+        return self.access_level.value >= level.value
     
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)

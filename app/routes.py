@@ -2,8 +2,10 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request,
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.urls import url_parse
 from . import db
-from .models import User, Task, Tag
+from .models import User, Task, Tag, AccessLevel
 from .forms import RegistrationForm, LoginForm, TaskForm, ClaimTaskForm, UnclaimTaskForm
+from .decorators import access_required
+
 
 main = Blueprint('main', __name__)
 
@@ -22,6 +24,7 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
+        user.set_access_level(AccessLevel.MOOT)  # Set default access level
         db.session.add(user)
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
@@ -44,6 +47,34 @@ def login():
             next_page = url_for('main.index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
+
+@main.route('/admin_dashboard')
+@login_required
+@access_required(AccessLevel.MOOT)
+def admin_dashboard():
+    users = User.query.all()
+    return render_template('admin_dashboard.html', users=users)
+
+@main.route('/moderator_dashboard')
+@login_required
+@access_required(AccessLevel.ANON)
+def moderator_dashboard():
+    # Moderator specific functionality
+    return render_template('moderator_dashboard.html')
+
+@main.route('/set_user_level/<int:user_id>', methods=['POST'])
+@login_required
+@access_required(AccessLevel.MOOT)
+def set_user_level(user_id):
+    user = User.query.get_or_404(user_id)
+    new_level = request.form.get('level')
+    try:
+        user.set_access_level(new_level)
+        db.session.commit()
+        flash(f'User {user.username} access level updated to {new_level}', 'success')
+    except ValueError:
+        flash('Invalid access level', 'error')
+    return redirect(url_for('main.admin_dashboard'))
 
 @main.route('/logout')
 @login_required
@@ -70,10 +101,13 @@ def new_task():
     if form.validate_on_submit():
         task = Task(title=form.title.data, description=form.description.data, status='New tasks', author=current_user)
         db.session.add(task)
-        if form.category.data:
-            category_tag = Tag(name=form.category.data, type='category')
-            db.session.add(category_tag)
-            task.add_tag(category_tag)
+        tag_names = [name.strip() for name in form.tags.data.split(',') if name.strip()]
+        for tag_name in tag_names:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name, type='category')  # Assuming 'category' type for non-claim tags
+                db.session.add(tag)
+            task.tags.append(tag)
         db.session.commit()
         flash('Your task has been created!', 'success')
         return redirect(url_for('main.task', task_id=task.id))
@@ -96,11 +130,10 @@ def update_task(task_id):
         task.title = form.title.data
         task.description = form.description.data
         task.status = form.status.data
-
         # Handle tags
         new_tag_names = [name.strip() for name in form.tags.data.split(',') if name.strip()]
-        # Remove existing tags
-        task.tags = []
+        # Remove existing category tags
+        task.tags = [tag for tag in task.tags if tag.type != 'category']
         # Add new tags
         for tag_name in new_tag_names:
             tag = Tag.query.filter_by(name=tag_name, type='category').first()
@@ -108,9 +141,8 @@ def update_task(task_id):
                 tag = Tag(name=tag_name, type='category')
                 db.session.add(tag)
             task.tags.append(tag)
-
         db.session.commit()
-        flash('Your task has been updated! (you will need to re-claim the task after updating)', 'success')
+        flash('Your task has been updated!', 'success')
         return redirect(url_for('main.task', task_id=task.id))
     elif request.method == 'GET':
         form.title.data = task.title

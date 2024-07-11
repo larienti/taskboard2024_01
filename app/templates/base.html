@@ -21,6 +21,14 @@
             <a class="nav-item nav-link" href="{{ url_for('main.login') }}">Login</a>
             <a class="nav-item nav-link" href="{{ url_for('main.register') }}">Register</a>
             {% endif %}
+            {% if current_user.is_authenticated %}
+            {% if current_user.has_access_level('ANON') %}
+            <a class="nav-item nav-link" href="{{ url_for('main.moderator_dashboard') }}">Moderator Chatboard</a>
+            {% endif %}
+            {% if current_user.has_access_level('MOOT') %}
+            <a class="nav-item nav-link" href="{{ url_for('main.admin_dashboard') }}">Admin Dashboard</a>
+            {% endif %}
+            {% endif %}
         </div>
     </nav>
     <main class="container mt-4">
