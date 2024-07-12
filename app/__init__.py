@@ -10,8 +10,8 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
-    app.config['SECRET_KEY'] = 'your-secret-key'  # Change this!
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@db/taskboard'
+    app.config['SECRET_KEY'] = - os.environ.get('SECRET_KEY', 'fallback-secret-key') #your_development_secret_key  # Change this!
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@db/taskboard')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)

@@ -96,6 +96,7 @@ def claimed_tasks():
 
 @main.route('/task/new', methods=['GET', 'POST'])
 @login_required
+@access_required(AccessLevel.ANON)
 def new_task():
     form = TaskForm()
     if form.validate_on_submit():
@@ -121,6 +122,7 @@ def task(task_id):
 
 @main.route('/task/<int:task_id>/update', methods=['GET', 'POST'])
 @login_required
+@access_required(AccessLevel.ANON)
 def update_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.author != current_user:
@@ -153,6 +155,7 @@ def update_task(task_id):
 
 @main.route('/task/<int:task_id>/delete', methods=['POST'])
 @login_required
+@access_required(AccessLevel.ANON)
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.author != current_user:
@@ -164,12 +167,14 @@ def delete_task(task_id):
 
 @main.route('/kanban')
 @login_required
+@access_required(AccessLevel.ANON)
 def kanban():
     tasks = Task.query.filter_by(user_id=current_user.id).all()
     return render_template('kanban.html', tasks=tasks)
 
 @main.route('/update_task_status', methods=['POST'])
 @login_required
+@access_required(AccessLevel.ANON)
 def update_task_status():
     task_id = request.json.get('taskId')
     new_status = request.json.get('newStatus')
@@ -189,6 +194,7 @@ def update_task_status():
 
 @main.route('/claim_task/<int:task_id>', methods=['POST'])
 @login_required
+@access_required(AccessLevel.ANON)
 def claim_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.is_claimed_by(current_user):
