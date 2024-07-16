@@ -1,1 +1,1 @@
-web: gunicorn taskboard001.wsgi
+web: gunicorn run:app
