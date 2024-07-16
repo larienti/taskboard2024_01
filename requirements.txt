@@ -6,3 +6,4 @@ psycopg2-binary==2.9.6
 Werkzeug==2.3.6
 email_validator==2.1.2
 Flask-Migrate==4.0.4
+gunicorn

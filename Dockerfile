@@ -1,16 +1,21 @@
 FROM python:3.9-slim
 
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+# Install PostgreSQL client and other necessary packages
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Copy and install requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
+# Copy the rest of the application
 COPY . .
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Make sure the entrypoint script is executable
+RUN chmod +x /app/entrypoint.sh
+
+# Use gunicorn as the production server
+CMD gunicorn --bind 0.0.0.0:$PORT run:app
