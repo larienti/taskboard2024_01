@@ -18,4 +18,4 @@ COPY . .
 RUN chmod +x /app/entrypoint.sh
 
 # Use gunicorn as the production server
-CMD gunicorn --bind 0.0.0.0:$PORT run:app
+CMD gunicorn --bind 0.0.0.0:$PORT run:app   
