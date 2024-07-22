@@ -7,7 +7,6 @@ import os
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'main.login'
-migrate = Migrate()
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -24,7 +23,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
-    migrate.init_app(app, db)
+    Migrate(app, db)  # Initialize Flask-Migrate here
 
     from .routes import main
     from .models import User, Task, Tag, AccessLevel
