@@ -1,9 +1,9 @@
-Flask
+Flask==2.3.2
 Flask-SQLAlchemy
 Flask-Login
 Flask-WTF
 psycopg2-binary
-Werkzeug
+Werkzeug==2.3.7
 email_validator
 Flask-Migrate
 gunicorn
