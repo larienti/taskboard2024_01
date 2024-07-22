@@ -11,14 +11,10 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key')
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url:
-        if database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql://", 1)
-    else:
-        database_url = 'postgresql://user:password@db/taskboard'  # fallback for local development
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret-key')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///your_database.db')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
