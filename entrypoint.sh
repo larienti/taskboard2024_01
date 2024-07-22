@@ -18,7 +18,7 @@ flask db init
 flask db migrate -m "Create tables"
 
 # Apply the migration
-flask db upgrade
+flask db upgrade  
 
 # Start the Flask application
 python run.py
