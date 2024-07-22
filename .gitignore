@@ -43,7 +43,6 @@ ehthumbs.db
 Thumbs.db
 
 # Flask migrations
-migrations/
 
 # Jupyter Notebook
 .ipynb_checkpoints
