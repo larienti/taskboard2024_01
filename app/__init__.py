@@ -13,11 +13,9 @@ login_manager.login_view = 'main.login'
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
-    
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_secret_key')
     if not app.config['SECRET_KEY']:
         raise ValueError("No SECRET_KEY set for Flask application")
-
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///your_database.db')
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)

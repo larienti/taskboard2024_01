@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     tasks = db.relationship('Task', backref='author', lazy='dynamic')
     claims = db.relationship('Tag', back_populates='user')
-    access_level = db.Column(db.Enum(AccessLevel), default=AccessLevel.MOOT)
+    access_level = db.Column(db.Enum(AccessLevel), default=AccessLevel.NOOB)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
