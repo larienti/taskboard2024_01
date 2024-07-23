@@ -15,7 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Make sure the entrypoint script is executable
+#COPY entrypoint.sh .
 RUN chmod +x /app/entrypoint.sh
 
 # Use gunicorn as the production server
-CMD gunicorn --bind 0.0.0.0:$PORT run:app   
+#CMD gunicorn --bind 0.0.0.0:$PORT run:app   
+CMD ["/app/entrypoint.sh"]

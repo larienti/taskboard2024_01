@@ -7,18 +7,18 @@ until PGPASSWORD=$POSTGRES_PASSWORD psql -h "db" -U "$POSTGRES_USER" -d "$POSTGR
 done
 
 >&2 echo "Postgres is up - executing command"
+#!/bin/sh
 
-# Remove existing migrations
-rm -rf migrations
+# Initialize migrations if they don't exist
+if [ ! -d "migrations" ]; then
+    flask db init
+fi
 
-# Initialize migrations
-flask db init
-
-# Create a new migration
-flask db migrate -m "Create tables"
+# Create a new migration (if there are changes)
+flask db migrate -m "Heroku migration"
 
 # Apply the migration
-flask db upgrade  
+flask db upgrade
 
-# Start the Flask application
-python run.py
+# Start the application with gunicorn
+gunicorn --bind 0.0.0.0:$PORT run:app

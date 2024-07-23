@@ -24,6 +24,8 @@ def create_app():
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    app.config['DEBUG'] = os.environ.get('FLASK_ENV') == 'development'
+
     db.init_app(app)
     login_manager.init_app(app)
     Migrate(app, db)  # Initialize Flask-Migrate here
