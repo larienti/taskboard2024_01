@@ -19,7 +19,7 @@ fi
 
 # Create a new migration (if there are changes)
 echo "Creating new migration"
-flask db migrate -m "Heroku migration"
+flask db migrate -m "Railway migration"
 
 # Apply the migration
 echo "Applying migration"
