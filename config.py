@@ -7,7 +7,7 @@ class Config:
     if db_url:
         url = urlparse(db_url)
         query = dict(parse_qsl(url.query))
-        query.update({'connect_timeout': '10'})
+        query.update({'connect_timeout': '30', 'sslmode': 'require'})
         url = url._replace(query=urlencode(query))
         SQLALCHEMY_DATABASE_URI = url.geturl()
     else:
