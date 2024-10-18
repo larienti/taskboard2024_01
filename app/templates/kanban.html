@@ -101,3 +101,21 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 </script>
 {% endblock %}
+
+<div>A general model (with continuous paths) can be writtenwhere the short rate  and spot volatility  are stochastic processes.
+
+    In the Black-Scholes model both  and  are deterministic functions of time (even constant in the original model). This produces a flat smile for any expiry . And we have the closed form formula for option priceswhere  is the BS formula and . This is not consistent with the smile observed on the market. In order to match market prices, one needs to use a different volatility for each expiry and strike. This is the implied volatility surface .
+    
+    In the local volatility model, rates are deterministic, instant volatility is stochastic but there is only one source of randomnessthis is a special case of the general model withWhat is appealing with this model is that the function  can be perfectly calibrated to match all market vanilla prices (and quite easily too).
+    
+    The problem is that while correlated to the spot, statistical study show that the volatility also has its own source of randomness independent of that of the spot. Mathematically, this means the instant correlation between the spot and vol is not 1 contrary to what happens in the local volatility model.
+    
+    This can be seen in several ways:
+    
+    The forward smile. Forward implied volatility is implied from prices of forward start options: ignoring interest rates,Alternatively, it is sometimes defined as the expectation of implied volatility at a forward date. In a LV model, as the maturity  increases but  is kept constant, the forward smile gets flatter and higher. This is not what we observe in the markets where the forward smile tends to be similar to the current smile.
+    This is because the initial smile you calibrate the model too has decreasing skew:
+    Smile rolling. In a LV model, smile tends to move in the opposite direction of the spot and get higher independently of the direction of the spot. This is not consistent with what is observed on markets. See Hagan and al. Managing Smile Risk for the derivation. This means that  often has the wrong sign so your Delta will be wrong which can lead to a higher hedging error than using BS.
+    Barrier options. In FX markets, barrier options like Double No Touch are liquid but a LV model calibrated to vanilla prices does not reproduce these prices. This is a consequence of the previous point.
+    The LV model is a static model. Its whole dynamic comes from the volatility surface at time 0. But the vol surface has a dynamic that is richer than that.
+    
+    There are alternatives using multiple factors like SV models, LSV models (parametric local vol like SABR or fully non parametric local vol), models of the joint dynamic of the spot and vol surface etc... but the LV model remains the default model in many cases due to its simplicity, its ability to calibrate the initial smile perfectly and its numerical efficiency.</div>
