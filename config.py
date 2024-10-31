@@ -9,7 +9,8 @@ class Config:
         query = dict(parse_qsl(url.query))
         query.update({'connect_timeout': '30'})
         url = url._replace(query=urlencode(query))
-        SQLALCHEMY_DATABASE_URI = url.geturl()
+        SQLALCHEMY_DATABASE_URI = url.geturl()  
+        print(f"Database URL for SQLAlchemy: {SQLALCHEMY_DATABASE_URI}")
     else:
         SQLALCHEMY_DATABASE_URI = 'sqlite:///your_database.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

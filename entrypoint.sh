@@ -1,30 +1,33 @@
-#!/bin/sh
+#!/bin/bash
 
-# Print current directory and its contents
 echo "Current directory: $(pwd)"
 ls -la
 
-# Check if migrations directory exists
-if [ -d "migrations" ]; then
-    echo "Migrations directory exists"
-else
-    echo "Migrations directory does not exist"
-fi
+# Display the database URL for debugging
+echo "Database URL: $SQLALCHEMY_DATABASE_URI"
 
-# Initialize migrations if they don't exist
+# Wait for PostgreSQL to be ready
+echo "Waiting for PostgreSQL connection..."
+until pg_isready -h postgres.railway.internal -p 5432 -U postgres; do
+    >&2 echo "PostgreSQL is unavailable - retrying"
+    sleep 5
+done
+
+echo "PostgreSQL is up - proceeding"
+
+# Initialize migrations if not exists
 if [ ! -d "migrations" ]; then
     echo "Initializing migrations"
     flask db init
 fi
 
-# Create a new migration (if there are changes)
-echo "Creating new migration"
-flask db migrate -m "Railway migration"
+# Run migrations
+echo "Creating new migration (if necessary)"
+flask db migrate -m "Railway migration" || echo "No changes to migrate."
 
-# Apply the migration
-echo "Applying migration"
+echo "Applying migrations"
 flask db upgrade
 
-# Start the application with gunicorn
+# Start application with gunicorn
 echo "Starting gunicorn"
-gunicorn --bind 0.0.0.0:$PORT run:app
+exec gunicorn --bind 0.0.0.0:$PORT run:app

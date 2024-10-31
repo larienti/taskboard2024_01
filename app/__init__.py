@@ -11,16 +11,21 @@ login_manager.login_view = 'main.login'
 
 def create_app(config_name=None):
     if config_name is None:
-        config_name = os.environ.get('FLASK_ENV', 'default')
+        config_name = os.environ.get('FLASK_ENV', 'production')  # Default to production
 
-    app = Flask(__name__, static_folder='static', static_url_path='/static')
+    app = Flask(__name__)
     app.config.from_object(config[config_name])
 
     print(f"Environment: {config_name}")
-    print(f"DATABASE_URL: {os.environ.get('DATABASE_URL')}")
-    print(f"DATABASE_PUBLIC_URL: {os.environ.get('DATABASE_PUBLIC_URL')}")
-    print(f"App SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
+    # ... rest of the function
+    try:
+        with app.app_context():
+            db.engine.connect()
+        print("Successfully connected to the database!")
+    except Exception as e:
+        print(f"Failed to connect to the database: {str(e)}")
     # ... rest of the function
     db.init_app(app)
     login_manager.init_app(app)
