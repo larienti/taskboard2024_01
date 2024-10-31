@@ -22,3 +22,6 @@ DATABASE_URL = "${{ services.db.url }}"  # This links the database URL dynamical
 [services.db]
 name = "db"
 type = "postgres"
+
+[services.web]
+release = "flask db upgrade"
