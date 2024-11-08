@@ -1,3 +1,5 @@
+import time
+import psycopg2
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -19,13 +21,21 @@ def create_app(config_name=None):
     print(f"Environment: {config_name}")
     print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
-    # Attempt connection to the database
-    try:
-        with app.app_context():
-            db.engine.connect()
-        print("Successfully connected to the database!")
-    except Exception as e:
-        print(f"Failed to connect to the database: {str(e)}")
+    # Retry connection to the database with psycopg2
+    retries = 5
+    while retries > 0:
+        try:
+            # Test connection using psycopg2
+            conn = psycopg2.connect(app.config['SQLALCHEMY_DATABASE_URI'])
+            conn.close()
+            print("Successfully connected to the database!")
+            break
+        except psycopg2.OperationalError as e:
+            print(f"Database connection failed: {e}")
+            retries -= 1
+            time.sleep(5)  # wait 5 seconds before retrying
+    else:
+        print("Could not connect to the database after several attempts.")
 
     # Initialize extensions
     db.init_app(app)
