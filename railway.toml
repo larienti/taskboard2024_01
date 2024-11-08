@@ -12,26 +12,13 @@ env = "production"
 start = "gunicorn run:app --bind 0.0.0.0:$PORT"
 release = "flask db upgrade"  # Migration on deployment
 
-# Define environment variables for the web service
-[[services.web.env]]
-key = "FLASK_APP"
-value = "run.py"
-
-[[services.web.env]]
-key = "FLASK_ENV"
-value = "production"
-
-[[services.web.env]]
-key = "SECRET_KEY"
-value = "46dbafcde6cdeda05ffc6c3fad5897fd"
-
-[[services.web.env]]
-key = "SQLALCHEMY_DATABASE_URI"
-value = "$DATABASE_URL"
-
-[[services.web.env]]
-key = "DATABASE_URL"
-value = "${{ services.db.url }}"  # Link to the database URL dynamically
+# Define environment variables in a single table
+[services.web.env]
+FLASK_APP = "run.py"
+FLASK_ENV = "production"
+SECRET_KEY = "46dbafcde6cdeda05ffc6c3fad5897fd"
+SQLALCHEMY_DATABASE_URI = "$DATABASE_URL"
+DATABASE_URL = "${{ services.db.url }}"  # Link to the database URL dynamically
 
 # Define the PostgreSQL database service
 [services.db]
