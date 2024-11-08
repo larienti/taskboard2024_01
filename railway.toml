@@ -1,0 +1,4 @@
+# railway.toml - Minimal placeholder file
+
+[project]
+name = "your_project_name"
