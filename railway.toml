@@ -1,4 +1,5 @@
 # railway.toml
+
 [project]
 name = "your_project_name"
 
@@ -9,8 +10,9 @@ name = "web"
 type = "web"
 env = "production"
 start = "gunicorn run:app --bind 0.0.0.0:$PORT"
+release = "flask db upgrade"  # Migration on deployment
 
-# Set environment variables individually for the web service
+# Define environment variables for the web service
 [[services.web.env]]
 key = "FLASK_APP"
 value = "run.py"
@@ -35,7 +37,3 @@ value = "${{ services.db.url }}"  # Link to the database URL dynamically
 [services.db]
 name = "db"
 type = "postgres"
-
-# Optional: Define a release command to apply migrations on deployment
-[services.web]
-release = "flask db upgrade"
