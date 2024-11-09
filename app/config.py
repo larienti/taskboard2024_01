@@ -1,14 +1,27 @@
 import os
 
+import os
+from urllib.parse import urlparse
+
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_dev_key')
-    # Handle Railway's DATABASE_URL format
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
-        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
+    
+    # Parse DATABASE_URL components
+    database_url = os.getenv('DATABASE_URL')
+    if database_url:
+        url = urlparse(database_url)
+        DB_USER = url.username
+        DB_PASSWORD = url.password
+        DB_HOST = url.hostname
+        DB_PORT = url.port or 5432
+        DB_NAME = url.path[1:]  # Remove leading '/'
+        
+        # Construct URL ensuring proper formatting
+        SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    else:
+        raise ValueError("DATABASE_URL environment variable is not set")
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # Add some useful defaults for production
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': int(os.getenv('DB_POOL_SIZE', '5')),
         'max_overflow': int(os.getenv('DB_MAX_OVERFLOW', '10')),
