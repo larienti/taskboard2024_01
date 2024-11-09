@@ -1,4 +1,31 @@
-# railway.toml - Minimal placeholder file
+# railway.toml
 
 [project]
 name = "your_project_name"
+
+[services]
+
+# Define your web service (Flask app)
+[services.web]
+name = "web"
+type = "web"
+env = "production"
+start = "flask db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
+
+# Set environment variables individually using an array of tables
+[[services.web.env]]
+key = "SECRET_KEY"
+value = "your_secret_key"
+
+[[services.web.env]]
+key = "FLASK_ENV"
+value = "production"
+
+[[services.web.env]]
+key = "DATABASE_URL"
+value = "${{ services.db.url }}"  # Link to the database URL dynamically
+
+# Define the PostgreSQL database service
+[services.db]
+name = "db"
+type = "postgres"

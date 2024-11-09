@@ -1,5 +1,4 @@
 import os
-#from urllib.parse import urlparse
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_dev_key')
