@@ -1,7 +1,7 @@
 # railway.toml
 
 [project]
-name = "taskboard"
+name = "authentic-benevolence"
 
 # Define your web service (Flask app)
 [services.web]
