@@ -2,13 +2,18 @@ services:
   web:
     build: .
     ports:
-      - "5000:5000"
+      - "${PORT:-5000}:${PORT:-5000}"  # Use Railway's PORT or default to 5000
     environment:
       - FLASK_APP=run.py
-      - FLASK_ENV=production  # Change this to 'production' for Railway
-      - SECRET_KEY=${SECRET_KEY}  # Use an environment variable for the secret key
-      - DATABASE_URL=${DATABASE_URL}  # Use Railway's DATABASE_URL
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - PORT=${PORT:5432}
+      - PYTHONUNBUFFERED=1  # Ensures Python output isn't buffered
     volumes:
       - .:/app
-
-# Remove the 'db' service and 'volumes' section
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-5000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -1,16 +1,27 @@
-# railway.toml
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
-[project]
-name = "authentic-benevolence"
+[deploy]
+startCommand = "flask db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
 
-# Define your web service (Flask app)
-[services.web]
-name = "web"
-type = "web"
-env = "production"
-start = "flask db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
+[[services]]
+internal_port = 5000
+protocol = "http"
+auto_deploy = true
 
-# Define the PostgreSQL database service
-[services.db]
-name = "db"
-type = "postgres"
+[services.healthcheck]
+path = "/health"
+interval = "30s"
+timeout = "10s"
+retries = 3
+
+[services.environment]
+FLASK_APP = "run.py"
+FLASK_ENV = "production"
+DB_POOL_SIZE = "5"
+DB_MAX_OVERFLOW = "10"
+DB_POOL_TIMEOUT = "30"
+DB_POOL_RECYCLE = "1800"
