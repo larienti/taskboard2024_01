@@ -10,12 +10,6 @@ type = "web"
 env = "production"
 start = "flask db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
 
-# Environment variables for the web service
-[services.web.env]
-SECRET_KEY = "46dbafcde6cdeda05ffc6c3fad5897fd"
-FLASK_ENV = "production"
-DATABASE_URL = "${{ services.db.url }}"
-
 # Define the PostgreSQL database service
 [services.db]
 name = "db"
