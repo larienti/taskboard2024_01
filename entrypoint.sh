@@ -4,7 +4,13 @@ set -e  # Exit on error
 echo "Starting deployment process..."
 echo "Current directory: $(pwd)"
 ls -la
+echo "Testing network connectivity..."
+nc -zv postgres.railway.internal 5432
 
+echo "Checking PostgreSQL connection..."
+PGPASSWORD=UvVNaBnMprSeoBhjIVolZzExVXKGiqAA psql -h postgres.railway.internal -U postgres -d railway -c "SELECT 1;" || echo "Direct psql connection failed"
+
+echo "Starting application..."
 # Parse the DATABASE_URL to get connection details
 if [ -n "$DATABASE_URL" ]; then
     echo "Database URL is set"

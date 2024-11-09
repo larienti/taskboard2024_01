@@ -3,12 +3,12 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "flask db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
+startCommand = "flask db upgrade && gunicorn run:app --bind 0.0.0.0:5432"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
 [[services]]
-internal_port = 5000
+internal_port = 5432
 protocol = "http"
 auto_deploy = true
 
